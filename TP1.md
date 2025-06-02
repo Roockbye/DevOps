@@ -180,10 +180,33 @@ docker.io/library/phpmyadmin:latest
 ### b. Exécuter deux conteneurs à partir des images et ajouter une table ainsi que quelques enregistrements dans la base de données à l’aide de phpmyadmin
 
 ```
+rocky@pacman:~/Documents/DevOps$ docker run --name mysql-server \
+  -e MYSQL_ROOT_PASSWORD=root \
+  -e MYSQL_DATABASE=db-test \
+  -d mysql:5.7
+9facdddd67010b8e6ac5ad103e449bf169591ffac426bb20c94600cea1c55133
+```
+
+```
+rocky@pacman:~/Documents/DevOps$ docker run --name phpmyadmin   -d   --link mysql-server:db   -p 8081:80   -e PMA_HOST=db   phpmyadmin
+15238149f1e3350d103b3fbe878985e7d25ab9549eac3f2cf2d3ec0d2fb77606
+rocky@pacman:~/Documents/DevOps$ docker ps -a
+CONTAINER ID   IMAGE                  COMMAND                  CREATED             STATUS                  PORTS                                     NAMES
+15238149f1e3   phpmyadmin             "/docker-entrypoint.…"   3 seconds ago       Up 3 seconds            0.0.0.0:8081->80/tcp, [::]:8081->80/tcp   phpmyadmin
+9facdddd6701   mysql:5.7              "docker-entrypoint.s…"   7 minutes ago       Up 7 minutes            3306/tcp, 33060/tcp                       mysql-server
+d33578721bd0   mon-nginx              "/docker-entrypoint.…"   30 minutes ago      Up 30 minutes           0.0.0.0:8085->80/tcp, [::]:8085->80/tcp   custom-nginx
+859d2bd59d79   mon-nginx              "/docker-entrypoint.…"   32 minutes ago      Created                                                           nginx-dockerfile
+438337c3df45   nginx                  "/docker-entrypoint.…"   About an hour ago   Up About an hour        0.0.0.0:8080->80/tcp, [::]:8080->80/tcp   serveur-web
+69c7efef5bae   nwodtuhs/exegol:full   "/bin/bash /.exegol/…"   9 days ago          Exited (0) 9 days ago 
+```
+
+[connexion phpmyadmin](./phpmyadmin.png)
 
 ## 8. Faire la même chose que précédemment en utilisant un fichier docker-compose.yml
 
 ### a. Qu’apporte le fichier docker-compose par rapport aux commandes docker run ? Pourquoi est-il intéressant ? (cf. ce qui a été présenté pendant le cours)
+
+
 
 ### b. Quel moyen permet de configurer (premier utilisateur, première base de données, mot de passe root, …) facilement le conteneur mysql au lancement ?
 
