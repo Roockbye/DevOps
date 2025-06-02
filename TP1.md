@@ -202,6 +202,10 @@ d33578721bd0   mon-nginx              "/docker-entrypoint.…"   30 minutes ago 
 
 [connexion phpmyadmin](./phpmyadmin.png)
 
+La communication entre les deux conteneurs fonctionne grâce à l’option `--link`, qui permet à phpMyAdmin de résoudre le nom `db` vers l’IP du conteneur `mysql-server`.
+
+[ajout data mysql](./données.png)
+
 ## 8. Faire la même chose que précédemment en utilisant un fichier docker-compose.yml
 
 ### a. Qu’apporte le fichier docker-compose par rapport aux commandes docker run ? Pourquoi est-il intéressant ? (cf. ce qui a été présenté pendant le cours)
