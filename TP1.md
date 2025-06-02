@@ -80,27 +80,114 @@ Successfully copied 2.05kB to serveur-web:/usr/share/nginx/html/index.html
 
 ### a. A l’aide d’un Dockerfile, créer une image (commande docker build)
 
+Dockerfile
+```
+FROM nginx:latest
+COPY index.html /usr/share/nginx/html/index.html
+```
+```
+rocky@pacman:~/Documents/DevOps$ docker build -t mon-nginx .
+[+] Building 0.1s (7/7) FINISHED                                                                                                                                  docker:default
+ => [internal] load build definition from Dockerfile                                                                                                                        0.0s
+ => => transferring dockerfile: 103B                                                                                                                                        0.0s
+ => [internal] load metadata for docker.io/library/nginx:latest                                                                                                             0.0s
+ => [internal] load .dockerignore                                                                                                                                           0.0s
+ => => transferring context: 2B                                                                                                                                             0.0s
+ => [internal] load build context                                                                                                                                           0.0s
+ => => transferring context: 182B                                                                                                                                           0.0s
+ => [1/2] FROM docker.io/library/nginx:latest                                                                                                                               0.0s
+ => [2/2] COPY index.html /usr/share/nginx/html/index.html                                                                                                                  0.0s
+ => exporting to image                                                                                                                                                      0.0s
+ => => exporting layers                                                                                                                                                     0.0s
+ => => writing image sha256:2743929e6f93b0277c4203bb430055eab76622131915a96c5b0bda0d21f62d31                                                                                0.0s
+ => => naming to docker.io/library/mon-nginx                                                                                                                                0.0s
+rocky@pacman:~/Documents/DevOps$ ls
+Dockerfile  index.html  nginx.png  README.md  TP1.md
+```
+
 ### b. Exécuter cette nouvelle image de manière à servir la page html (commande docker run)
+
+```
+rocky@pacman:~/Documents/DevOps$ docker ps -a
+CONTAINER ID   IMAGE                  COMMAND                  CREATED          STATUS                  PORTS                                     NAMES
+859d2bd59d79   mon-nginx              "/docker-entrypoint.…"   58 seconds ago   Created                                                           nginx-dockerfile
+438337c3df45   nginx                  "/docker-entrypoint.…"   45 minutes ago   Up 45 minutes           0.0.0.0:8080->80/tcp, [::]:8080->80/tcp   serveur-web
+69c7efef5bae   nwodtuhs/exegol:full   "/bin/bash /.exegol/…"   9 days ago       Exited (0) 9 days ago                                             exegol-STHACK
+rocky@pacman:~/Documents/DevOps$ docker run --name custom-nginx -d -p 8085:80 mon-nginx
+d33578721bd0e05a6ff8e0592b3a84e16ccbce7d19fbbca1a82706687714a633
+```
+[custom-nginx](./custom-nginx.png)
 
 ### c. Quelles différences observez-vous entre les procédures 5. et 6. ? Avantages et inconvénients de l’une et de l’autre méthode ? (Mettre en relation ce qui est observé avec ce qui a été présenté pendant le cours)
 
+La procédure 5 consiste à utiliser une image existante (comme nginx) et à injecter la page HTML soit via un volume avec l’option -v, soit avec la commande docker cp. Cette méthode est rapide à mettre en place, idéale pour les tests ou le développement local, car elle permet de modifier les fichiers sans reconstruire l’image à chaque fois. Cependant, elle n’est pas adaptée aux déploiements professionnels ou automatisés, car l’image obtenue ne contient pas réellement les fichiers nécessaires. Cela rend difficile la reproductibilité, le versionnage ou l’intégration dans une chaîne CI/CD.
+
+La procédure 6 repose sur la création d’une image personnalisée avec un Dockerfile. Grâce à l’instruction COPY, le fichier HTML est inclus directement dans l’image lors de la phase de build. Cette méthode garantit que le comportement du conteneur est stable, versionnable et entièrement reproductible sur n’importe quel environnement. Elle s’intègre bien dans les pratiques DevOps, notamment dans les processus d’intégration et de déploiement continus. En revanche, elle est un peu plus lente à utiliser en développement, car chaque modification du HTML impose de recompiler l’image.
+
+Ainsi, la procédure 5 est davantage orientée vers la phase de développement ou de test rapide, tandis que la procédure 6 est adaptée à l’industrialisation, à la publication sur un registre Docker et à une utilisation dans des environnements de production.
+
+#### Il  faut séparer les environnements dynamiques de développement des environnements stables et automatisés de production.
+
 ## 7. Utiliser une base de données dans un conteneur docker
 
-    a. Récupérer les images mysql:5.7 et phpmyadmin depuis le Docker Hub
+### a. Récupérer les images mysql:5.7 et phpmyadmin depuis le Docker Hub
 
-    b. Exécuter deux conteneurs à partir des images et ajouter une table ainsi que
-quelques enregistrements dans la base de données à l’aide de phpmyadmin
+```
+rocky@pacman:~/Documents/DevOps$ docker pull mysql:5.7
+5.7: Pulling from library/mysql
+20e4dcae4c69: Pulling fs layer 
+1c56c3d4ce74: Pull complete 
+e9f03a1c24ce: Pull complete 
+68c3898c2015: Pull complete 
+6b95a940e7b6: Pull complete 
+90986bb8de6e: Pull complete 
+ae71319cb779: Pull complete 
+ffc89e9dfd88: Pull complete 
+43d05e938198: Pull complete 
+064b2d298fba: Pull complete 
+df9a4d85569b: Pull complete 
+Digest: sha256:4bc6bc963e6d8443453676cae56536f4b8156d78bae03c0145cbe47c2aad73bb
+Status: Downloaded newer image for mysql:5.7
+docker.io/library/mysql:5.7
+rocky@pacman:~/Documents/DevOps$ docker pull phpmyadmin
+Using default tag: latest
+latest: Pulling from library/phpmyadmin
+61320b01ae5e: Already exists 
+b4ce612dc732: Pulling fs layer 
+093338982d92: Pulling fs layer 
+0c2a0ba9eb0c: Pulling fs layer 
+442abaed7751: Pulling fs layer 
+aa4e51934eef: Pulling fs layer 
+924949db942b: Pulling fs layer 
+153d2fb08c64: Pulling fs layer 
+26f17ce45149: Pulling fs layer 
+64a857ca8a6a: Pulling fs layer 
+7443480a6bdb: Pull complete 
+d4dfcfe68eba: Pull complete 
+91e76e37da73: Pull complete 
+4f4fb700ef54: Pull complete 
+708105cf3285: Pull complete 
+97739253e39f: Pull complete 
+6722b89322cb: Pull complete 
+9ebc473a2663: Pull complete 
+39ff72c5f974: Pull complete 
+2daa1390d242: Pull complete 
+Digest: sha256:73467128842bc4406372310f068bc9ccb6727a82c7b5dc9c4f3d815ead33eab8
+Status: Downloaded newer image for phpmyadmin:latest
+docker.io/library/phpmyadmin:latest
+```
 
-8. Faire la même chose que précédemment en utilisant un fichier
-docker-compose.yml
+### b. Exécuter deux conteneurs à partir des images et ajouter une table ainsi que quelques enregistrements dans la base de données à l’aide de phpmyadmin
 
-    a. Qu’apporte le fichier docker-compose par rapport aux commandes docker run
-    ? Pourquoi est-il intéressant ? (cf. ce qui a été présenté pendant le cours)
+```
 
-    b. Quel moyen permet de configurer (premier utilisateur, première base de
-    données, mot de passe root, …) facilement le conteneur mysql au lancement ?
+## 8. Faire la même chose que précédemment en utilisant un fichier docker-compose.yml
 
-9. Observation de l’isolation réseau entre 3 conteneurs
+### a. Qu’apporte le fichier docker-compose par rapport aux commandes docker run ? Pourquoi est-il intéressant ? (cf. ce qui a été présenté pendant le cours)
+
+### b. Quel moyen permet de configurer (premier utilisateur, première base de données, mot de passe root, …) facilement le conteneur mysql au lancement ?
+
+## 9. Observation de l’isolation réseau entre 3 conteneurs
 
     a. A l’aide de docker-compose et de l’image praqma/network-multitool
     disponible sur le Docker Hub créer 3 services (web, app et db) et 2 réseaux
