@@ -1,0 +1,25 @@
+version: "3.8"
+
+services:
+  web:
+    image: praqma/network-multitool
+    container_name: web
+    networks:
+      - frontend
+
+  app:
+    image: praqma/network-multitool
+    container_name: app
+    networks:
+      - frontend
+      - backend
+
+  db:
+    image: praqma/network-multitool
+    container_name: db
+    networks:
+      - backend
+
+networks:
+  frontend:
+  backend:
