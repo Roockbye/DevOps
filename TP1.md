@@ -210,20 +210,33 @@ La communication entre les deux conteneurs fonctionne grâce à l’option `--li
 
 ### a. Qu’apporte le fichier docker-compose par rapport aux commandes docker run ? Pourquoi est-il intéressant ? (cf. ce qui a été présenté pendant le cours)
 
+Le fichier `docker-compose.yml` permet de décrire toute l’architecture applicative en un seul fichier. Contrairement à `docker run`, qui nécessite de nombreuses options à taper à chaque fois, `docker-compose` est **plus lisible, modifiable et versionnable**.
 
+Il devient très facile de partager ou relancer l’environnement de travail complet avec une simple commande : `docker-compose up -d`.
+
+Intérêt du fichier `docker-compose`
+
+- Centralise toute la configuration (services, variables d’environnement, ports…).
+- Réduit le risque d’erreur humaine.
+- Compatible avec des outils CI/CD (GitLab CI, Jenkins…).
+- Gère les dépendances (ex. `depends_on` entre phpMyAdmin et MySQL).
+- Permet de **scaler ou isoler plusieurs environnements** de test facilement.
 
 ### b. Quel moyen permet de configurer (premier utilisateur, première base de données, mot de passe root, …) facilement le conteneur mysql au lancement ?
 
+Le service `mysql` est initialisé avec :
+- `MYSQL_ROOT_PASSWORD=root`
+- `MYSQL_DATABASE=db-test`
+- `MYSQL_USER=tpuser`
+- `MYSQL_PASSWORD=motdepasse123`
+
+Cela permet de démarrer avec une base prête à l’emploi, sans avoir besoin de se connecter et tout créer à la main.
+
+
 ## 9. Observation de l’isolation réseau entre 3 conteneurs
 
-    a. A l’aide de docker-compose et de l’image praqma/network-multitool
-    disponible sur le Docker Hub créer 3 services (web, app et db) et 2 réseaux
-    (frontend et backend).
-    Les services web et db ne devront pas pouvoir effectuer de ping de l’un vers
-    l’autre
+### a. A l’aide de docker-compose et de l’image praqma/network-multitool disponible sur le Docker Hub créer 3 services (web, app et db) et 2 réseaux (frontend et backend). Les services web et db ne devront pas pouvoir effectuer de ping de l’un vers l’autre
 
-    b. Quelles lignes du résultat de la commande docker inspect justifient ce
-    comportement ?
+### b. Quelles lignes du résultat de la commande docker inspect justifient ce comportement ?
 
-    c. Dans quelle situation réelles (avec quelles images) pourrait-on avoir cette
-    configuration réseau ? Dans quel but ?
+### c. Dans quelle situation réelles (avec quelles images) pourrait-on avoir cette configuration réseau ? Dans quel but ?
