@@ -64,6 +64,8 @@ praqma/network-multitool   latest    1631e536ed7d   3 years ago      39.9MB
 
 ### 4. Compléter le fichier docker-compose.yml afin d’éxécuter ma_super_app avec sa base de données.
 
+Voir fichier docker-compose.yml
+
 ```
 rocky@pacman:~/Documents/DevOps/tp-docker-2$ docker compose build
 WARN[0000] /home/rocky/Documents/DevOps/tp-docker-2/docker-compose.yml: the attribute `version` is obsolete, it will be ignored, please remove it to avoid potential confusion 
