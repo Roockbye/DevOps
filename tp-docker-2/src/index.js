@@ -29,7 +29,7 @@ app.get('/', (req, res) => {
     res.send(`'${query}' => ${result[0].sum}`);
   });
 
-  connection.end
+  connection.end();
 });
 
 app.listen(PORT, HOST);
