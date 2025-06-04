@@ -129,4 +129,76 @@ d33578721bd0   mon-nginx                  "/docker-entrypoint.…"   42 hours ag
 69c7efef5bae   nwodtuhs/exegol:full       "/bin/bash /.exegol/…"   11 days ago          Exited (0) 11 days ago                                                   exegol-STHACK
 rocky@pacman:~/Documents/DevOps/tp-docker-2$ 
 ```
+
+```
+rocky@pacman:~/Documents/DevOps/tp-docker-2$ docker compose up --build -d
+WARN[0000] /home/rocky/Documents/DevOps/tp-docker-2/docker-compose.yml: the attribute `version` is obsolete, it will be ignored, please remove it to avoid potential confusion 
+Compose can now delegate builds to bake for better performance.
+ To do so, set COMPOSE_BAKE=true.
+[+] Building 2.3s (11/11) FINISHED                                                                                                                                docker:default
+ => [node internal] load build definition from Dockerfile                                                                                                                   0.0s
+ => => transferring dockerfile: 181B                                                                                                                                        0.0s
+ => [node internal] load metadata for docker.io/library/node:12-alpine3.9                                                                                                   2.2s
+ => [node internal] load .dockerignore                                                                                                                                      0.0s
+ => => transferring context: 2B                                                                                                                                             0.0s
+ => [node 1/5] FROM docker.io/library/node:12-alpine3.9@sha256:16d40e6c2858ee41cc7e19bb36f8a92718ad935ceae036e88dcffb68041dea6c                                             0.0s
+ => [node internal] load build context                                                                                                                                      0.0s
+ => => transferring context: 731B                                                                                                                                           0.0s
+ => CACHED [node 2/5] WORKDIR /app                                                                                                                                          0.0s
+ => CACHED [node 3/5] COPY package*.json ./                                                                                                                                 0.0s
+ => CACHED [node 4/5] RUN npm install --only=production                                                                                                                     0.0s
+ => [node 5/5] COPY . .                                                                                                                                                     0.1s
+ => [node] exporting to image                                                                                                                                               0.0s
+ => => exporting layers                                                                                                                                                     0.0s
+ => => writing image sha256:8c341524ab3c97fe58eaf87cd51a0c4a05666f2ae935868a71e0bb05dd076ede                                                                                0.0s
+ => => naming to docker.io/library/tp-docker-2-node                                                                                                                         0.0s
+ => [node] resolving provenance for metadata file                                                                                                                           0.0s
+[+] Running 5/5
+ ✔ node                             Built                                                                                                                                   0.0s 
+ ✔ Network tp-docker-2_default      Created                                                                                                                                 0.0s 
+ ✔ Volume "tp-docker-2_mysql_data"  Created                                                                                                                                 0.0s 
+ ✔ Container mysql                  Started                                                                                                                                 0.2s 
+ ✔ Container ma_super_app           Started                                                                                                                                 0.3s 
+```
+```
+rocky@pacman:~/Documents/DevOps/tp-docker-2$ docker compose ps
+WARN[0000] /home/rocky/Documents/DevOps/tp-docker-2/docker-compose.yml: the attribute `version` is obsolete, it will be ignored, please remove it to avoid potential confusion 
+NAME           IMAGE              COMMAND                  SERVICE   CREATED         STATUS         PORTS
+ma_super_app   tp-docker-2-node   "docker-entrypoint.s…"   node      9 seconds ago   Up 9 seconds   0.0.0.0:3000->3000/tcp, [::]:3000->3000/tcp
+mysql          mysql:5.7          "docker-entrypoint.s…"   mysql     9 seconds ago   Up 9 seconds   33060/tcp, 0.0.0.0:3307->3306/tcp, [::]:3307->3306/tcp
+```
+On vérifie sur : http://localhost:3000/
+
 [ma super app](../captures/ma_super_app.png)
+
+J'ai eu quelques soucis que j'ai du debug. C'était plusieurs erreurs au niveau de mon docker-compose.yml car j'avais mis de mauvaises options.
+Il faut utiliser la version 5.7 de mysql /!\
+
+Les commandes qui m'ont sauvé:
+
+```
+docker compose logs ma_super_app
+```
+```
+docker compose logs mysql
+```
+```
+docker compose logs node
+```
+```
+docker compose exec node sh
+```
+
+Une fois debug il faut:
+- Supprime les anciens conteneurs et données
+```
+docker compose down -v
+```
+- Rebuild et relance
+```
+docker compose build
+docker compose up -d
+```
+```
+docker compose ps
+```
