@@ -27,7 +27,11 @@ Résolution des deltas: 100% (43/43), fait.
 export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
 [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
+```
+```
 rocky@pacman:~/Documents/DevOps$ source ~/.bashrc
+```
+```
 rocky@pacman:~/Documents/DevOps$ nvm install 18
 Downloading and installing node v18.20.8...
 Downloading https://nodejs.org/dist/v18.20.8/node-v18.20.8-linux-x64.tar.xz...
@@ -134,6 +138,10 @@ npm start
 ```
 Nous pouvons accéder à l'application depuis : http://localhost:3000/
 
+(note: Penser à supprimer les anciens dockeurs qui tournent sur le port 3000)
+
+Nous avons bien la page react qui se lance.
+
 [project react](../captures/react.png)
 
 ## 4. Créez un fichier Dockerfile à la racine du projet. Celui-ci doit se diviser en deux grandes parties :
@@ -142,11 +150,27 @@ Voir fichier Dockerfile
 
 ### a. Étape 1 : Construction de l'application React FROM node:18-alpine as build
 
+```
+FROM node:18-alpine AS build
+WORKDIR /app
+COPY app/package*.json ./
+RUN npm install
+COPY app/ ./
+RUN npm run build
+```
+
 ### b. Étape 2 : Serveur web pour l'application FROM nginx:alpine
+
+```
+FROM nginx:alpine
+COPY --from=build /app/build /usr/share/nginx/html
+EXPOSE 80
+CMD ["nginx", "-g", "daemon off;"]
+```
 
 ## 5. Instanciez l’image créé précédemment afin d’observer le même résultat que lors de la question 3
 
-Attention : le dossier app doit se trouver dans le dossier TP3 car Docker n’autorise pas d’accéder à des fichiers situés en dehors du contexte de build.
+:!\ Attention : le dossier app doit se trouver dans le dossier TP3 car Docker n’autorise pas d’accéder à des fichiers situés en dehors du contexte de build.
 
 ```
 rocky@pacman:~/Documents/DevOps/TP3$ docker build -t react-nginx-app .
@@ -205,7 +229,7 @@ rocky@pacman:~/Documents/DevOps/TP3$ docker build -t react-nginx-app .
  => => naming to docker.io/library/react-nginx-app  
 ```
 
-Mon port 8080 était déjà utilisé à cause des exercices précédent, je peux changer de port d'écoute ou faire du nettoyage.
+Mon port 8080 était déjà utilisé à cause des exercices précédent, je peux changer de port d'écoute ou faire du nettoyage. J'ai décider de faire le ménage :
 
 ```
 rocky@pacman:~/Documents/DevOps/TP3$ sudo lsof -i :8080
@@ -227,6 +251,7 @@ rocky@pacman:~/Documents/DevOps/TP3$ docker stop 514792e4bb08
 rocky@pacman:~/Documents/DevOps/TP3$ docker run -d -p 8080:80 react-nginx-app
 0b11dd9eabf87cdbd85283c4a52b6164c9a0d7da7a465a7c4086f8c64657f71f
 ```
+Nous pouvons constater que le projet react c'est bien lancé :
 
 [affichage projet react](../captures/react_8080.png)
 
