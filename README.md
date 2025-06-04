@@ -12,9 +12,9 @@ Ce projet a pour objectif de découvrir, installer et manipuler Docker et Docker
 
 - docker-compose.yml : orchestration des services MySQL + PhpMyAdmin et des réseaux pour multitool
 
-- TP1.md : compte-rendu détaillé de chaque étape du TP
+- TP1.md : compte-rendu détaillé de chaque étape du TP1
 
-- captures/ : dossier contenant les captures d’écran (en attente de refonte)
+- captures/ : dossier contenant les captures d’écran
 
 ## Lancer les conteneurs
 Serveur web avec image personnalisée
@@ -37,4 +37,4 @@ Puis utiliser docker exec pour tester les pings entre conteneurs.
 
 ## Rapport
 
-Le fichier TP1.md contient un compte-rendu structuré et détaillé de toutes les étapes (installation, commandes, serveurs, volumes, build d’image, base de données, docker-compose, isolation réseau…).
+Le fichier TP1.md contient un compte-rendu structuré et détaillé de toutes les étapes du TP1 (installation, commandes, serveurs, volumes, build d’image, base de données, docker-compose, isolation réseau…). De même pour la suite des autres TPs.

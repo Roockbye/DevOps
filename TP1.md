@@ -1,6 +1,6 @@
 ## 5.Exécuter un serveur web (apache, nginx, …) dans un conteneur docker
 
-J'ai choisi NGINX pour ce TP
+J'ai choisi NGINX comme serveur web pour ce TP.
 
 Vérification des versions :
 ```
@@ -13,6 +13,10 @@ docker ps -a
 ```
 
 ### a. Récupérer l’image sur le Docker Hub
+
+```
+docker pull nginx
+```
 
 https://hub.docker.com/_/nginx
 
@@ -34,9 +38,17 @@ Status: Downloaded newer image for nginx:latest
 docker.io/library/nginx:latest
 ```
 
+Si on ne précise pas la version, il prend la dernière (latest).
+
 ### b. Vérifier que cette image est présente en local
 
 Vérification de la présence locale :
+
+```
+docker images
+ou
+docker ps -a
+```
 ```
 rocky@pacman:~/Documents/DevOps$ docker images
 REPOSITORY        TAG       IMAGE ID       CREATED        SIZE
@@ -55,13 +67,14 @@ rocky@pacman:~/nginx$ echo "<h1>Mon serveur web NGINX</h1>" > index.html
 rocky@pacman:~/nginx$ cat index.html
 <h1>Mon serveur web NGINX</h1>
 ```
+Il y a différentes manières de procéder pour cette étape, comme c'était un simple test rapide je n'ai fait qu'un echo mais pour la suite du TP j'ai crée le fichier index.html.
 
 ### d. Démarrer un conteneur et servir la page html créée précédemment à l’aide d’un volume (option -v de docker run)
 
 ```rocky@pacman:~/nginx$ docker run --name nginx -v $(pwd)/index.html:/usr/share/nginx/html/index.html:ro -p 8080:80 -d nginx
 e8ba350f40e9fefa63ea6bd9a7fce71811bee7562ec616e083e021d87e172c07
 ```
-[nginx](./nginx.png)
+[nginx](./captures/nginx.png)
 
 Le serveur est disponible sur http://localhost:8080
 
@@ -83,6 +96,7 @@ CONTAINER ID   IMAGE                  COMMAND                  CREATED      STAT
 69c7efef5bae   nwodtuhs/exegol:full   "/bin/bash /.exegol/…"   9 days ago   Exited (0) 9 days ago             exegol-STHACK
 rocky@pacman:~/nginx$ 
 ```
+Pour supprimer, ont peut faire avec le container ID ou son nom, je préfère le faire avec le container ID.
 
 ```
 rocky@pacman:~/nginx$ docker run --name serveur-web -p 8080:80 -d nginx
@@ -90,7 +104,6 @@ rocky@pacman:~/nginx$ docker run --name serveur-web -p 8080:80 -d nginx
 rocky@pacman:~/nginx$ docker cp index.html serveur-web:/usr/share/nginx/html/index.html
 Successfully copied 2.05kB to serveur-web:/usr/share/nginx/html/index.html
 ```
-
 
 ## 6. Builder une image
 
@@ -132,7 +145,7 @@ CONTAINER ID   IMAGE                  COMMAND                  CREATED          
 rocky@pacman:~/Documents/DevOps$ docker run --name custom-nginx -d -p 8085:80 mon-nginx
 d33578721bd0e05a6ff8e0592b3a84e16ccbce7d19fbbca1a82706687714a633
 ```
-[custom-nginx](./custom-nginx.png)
+[custom-nginx](./captures/custom-nginx.png)
 
 ### c. Quelles différences observez-vous entre les procédures 5. et 6. ? Avantages et inconvénients de l’une et de l’autre méthode ? (Mettre en relation ce qui est observé avec ce qui a été présenté pendant le cours)
 
@@ -140,9 +153,7 @@ La procédure 5 consiste à utiliser une image existante (comme nginx) et à inj
 
 La procédure 6 repose sur la création d’une image personnalisée avec un Dockerfile. Grâce à l’instruction COPY, le fichier HTML est inclus directement dans l’image lors de la phase de build. Cette méthode garantit que le comportement du conteneur est stable, versionnable et entièrement reproductible sur n’importe quel environnement. Elle s’intègre bien dans les pratiques DevOps, notamment dans les processus d’intégration et de déploiement continus. En revanche, elle est un peu plus lente à utiliser en développement, car chaque modification du HTML impose de recompiler l’image.
 
-Ainsi, la procédure 5 est davantage orientée vers la phase de développement ou de test rapide, tandis que la procédure 6 est adaptée à l’industrialisation, à la publication sur un registre Docker et à une utilisation dans des environnements de production.
-
-### Résumé:
+### En résumé:
 - Différences entre étapes 5 et 6 :
 
 Étape 5 utilise une image officielle et monte un volume à la volée ou copie le fichier après lancement.
@@ -209,6 +220,7 @@ Digest: sha256:73467128842bc4406372310f068bc9ccb6727a82c7b5dc9c4f3d815ead33eab8
 Status: Downloaded newer image for phpmyadmin:latest
 docker.io/library/phpmyadmin:latest
 ```
+Ici, on précise la version de mysql qu'on souhaite récuperer, sinon il prendra automatiquement la dernière. 
 
 ### b. Exécuter deux conteneurs à partir des images et ajouter une table ainsi que quelques enregistrements dans la base de données à l’aide de phpmyadmin
 
@@ -233,17 +245,21 @@ d33578721bd0   mon-nginx              "/docker-entrypoint.…"   30 minutes ago 
 69c7efef5bae   nwodtuhs/exegol:full   "/bin/bash /.exegol/…"   9 days ago          Exited (0) 9 days ago 
 ```
 
-[connexion phpmyadmin](./phpmyadmin.png)
+[connexion phpmyadmin](./captures/phpmyadmin.png)
 
 La communication entre les deux conteneurs fonctionne grâce à l’option `--link`, qui permet à phpMyAdmin de résoudre le nom `db` vers l’IP du conteneur `mysql-server`.
 
-[ajout data mysql](./données.png)
+[ajout data mysql](./captures/données.png)
+
+J'ai rajouté depuis l'interface de phpmyadmin des données tests.
 
 ## 8. Faire la même chose que précédemment en utilisant un fichier docker-compose.yml
 
+voir fichier docker-compose.yml (celui dans aucun dossier).
+
 ### a. Qu’apporte le fichier docker-compose par rapport aux commandes docker run ? Pourquoi est-il intéressant ? (cf. ce qui a été présenté pendant le cours)
 
-Le fichier `docker-compose.yml` permet de décrire toute l’architecture applicative en un seul fichier. Contrairement à `docker run`, qui nécessite de nombreuses options à taper à chaque fois, `docker-compose` est **plus lisible, modifiable et versionnable**.
+Le fichier `docker-compose.yml` permet de décrire toute l’architecture applicative en un seul fichier. Contrairement à `docker run`, qui nécessite de nombreuses options à taper à chaque fois(ce qui peut être assez pénible), `docker-compose` est **plus lisible, modifiable et versionnable**.
 
 Il devient très facile de partager ou relancer l’environnement de travail complet avec une simple commande : `docker-compose up -d`.
 
@@ -252,7 +268,7 @@ Intérêt du fichier `docker-compose`
 - Centralise toute la configuration (services, variables d’environnement, ports…).
 - Réduit le risque d’erreur humaine.
 - Compatible avec des outils CI/CD (GitLab CI, Jenkins…).
-- Gère les dépendances (ex. `depends_on` entre phpMyAdmin et MySQL).
+- Gère les dépendances (ex: `depends_on` entre phpMyAdmin et MySQL).
 - Permet de **scaler ou isoler plusieurs environnements** de test facilement.
 - Permet de décrire l’ensemble des services, réseaux, volumes dans un fichier unique
 - Plus simple à lancer, versionner, reproduire
@@ -271,6 +287,8 @@ Cela permet de démarrer avec une base prête à l’emploi, sans avoir besoin d
 ## 9. Observation de l’isolation réseau entre 3 conteneurs
 
 ### a. A l’aide de docker-compose et de l’image praqma/network-multitool disponible sur le Docker Hub créer 3 services (web, app et db) et 2 réseaux (frontend et backend). Les services web et db ne devront pas pouvoir effectuer de ping de l’un vers l’autre
+
+J'ai crée un dossier isolation afin de ne pas mélanger les docker-compose.yml et qu'il récupère celui nécessaire à cette étape.
 
 ```
 rocky@pacman:~/Documents/DevOps/isolation$ docker compose up -d
@@ -296,7 +314,7 @@ c60c9b3bcf40   praqma/network-multitool   "/bin/sh /docker/ent…"   About a min
 514792e4bb08   phpmyadmin/phpmyadmin      "/docker-entrypoint.…"   7 minutes ago        Up 7 minutes        0.0.0.0:8080->80/tcp, [::]:8080->80/tcp   devops-phpmyadmin-1
 7bbb5cb15014   mysql:5.7                  "docker-entrypoint.s…"   7 minutes ago        Up 7 minutes        3306/tcp, 33060/tcp                       devops-mysql-1
 ```
-
+Je me sers de docker exec afin de tester les pings entre les différents services.
 ```
 rocky@pacman:~/Documents/DevOps/isolation$ docker exec -it web sh
 / # ping db
@@ -589,6 +607,8 @@ rocky@pacman:~/Documents/DevOps/isolation$ docker inspect web
 ]
 ```
 
+Pour la partie web: **"NetworkMode": "isolation_frontend"**
+
 ```
 rocky@pacman:~/Documents/DevOps/isolation$ docker inspect db
 [
@@ -849,8 +869,59 @@ rocky@pacman:~/Documents/DevOps/isolation$ docker inspect db
     }
 ]
 ```
+Pour la partie db: **"NetworkMode": "isolation_backend"**
 
 La commande docker inspect <container> montre que web est uniquement sur frontend, db uniquement sur backend, et app sur les deux réseaux.
+
+Pour la partie app:
+```
+"Networks": {
+                "isolation_backend": {
+                    "IPAMConfig": null,
+                    "Links": null,
+                    "Aliases": [
+                        "app",
+                        "app"
+                    ],
+                    "MacAddress": "",
+                    "DriverOpts": null,
+                    "GwPriority": 0,
+                    "NetworkID": "2c05f0d1624f7cddf4879b221a8bcf1f68abb618b02d1aed3446efc284f98733",
+                    "EndpointID": "",
+                    "Gateway": "",
+                    "IPAddress": "",
+                    "IPPrefixLen": 0,
+                    "IPv6Gateway": "",
+                    "GlobalIPv6Address": "",
+                    "GlobalIPv6PrefixLen": 0,
+                    "DNSNames": [
+                        "app",
+                        "7e8798b76cc6"
+                    ]
+                },
+                "isolation_frontend": {
+                    "IPAMConfig": null,
+                    "Links": null,
+                    "Aliases": [
+                        "app",
+                        "app"
+                    ],
+                    "MacAddress": "",
+                    "DriverOpts": null,
+                    "GwPriority": 0,
+                    "NetworkID": "7fa40c69b3075d5d4210e6fa1b9bd1905f1e12e728cf4ea8dfcd1f145c8b9f71",
+                    "EndpointID": "",
+                    "Gateway": "",
+                    "IPAddress": "",
+                    "IPPrefixLen": 0,
+                    "IPv6Gateway": "",
+                    "GlobalIPv6Address": "",
+                    "GlobalIPv6PrefixLen": 0,
+                    "DNSNames": [
+                        "app",
+                        "7e8798b76cc6"
+```
+(code non entier, ici seulement **"Networks"** nous intéresse, on voit bien qu'il y a **"isolation_frontend"** et **"isolation_backend"**)
 
 ### c. Dans quelle situation réelles (avec quelles images) pourrait-on avoir cette configuration réseau ? Dans quel but ?
 
@@ -860,11 +931,24 @@ La commande docker inspect <container> montre que web est uniquement sur fronten
 
 - db : base de données protégée (accès privé uniquement)
 
+```
+rocky@pacman:~/Documents/DevOps$ docker ps -a
+CONTAINER ID   IMAGE                      COMMAND                  CREATED        STATUS                    PORTS                                     NAMES
+daaeccf4a484   praqma/network-multitool   "/bin/sh /docker/ent…"   15 hours ago   Exited (0) 14 hours ago                                             db
+c60c9b3bcf40   praqma/network-multitool   "/bin/sh /docker/ent…"   15 hours ago   Exited (0) 14 hours ago                                             web
+7e8798b76cc6   praqma/network-multitool   "/bin/sh /docker/ent…"   15 hours ago   Exited (0) 14 hours ago                                             app
+514792e4bb08   phpmyadmin/phpmyadmin      "/docker-entrypoint.…"   15 hours ago   Up 20 minutes             0.0.0.0:8080->80/tcp, [::]:8080->80/tcp   devops-phpmyadmin-1
+7bbb5cb15014   mysql:5.7                  "docker-entrypoint.s…"   15 hours ago   Up 20 minutes             3306/tcp, 33060/tcp                       devops-mysql-1
+d33578721bd0   mon-nginx                  "/docker-entrypoint.…"   41 hours ago   Exited (0) 40 hours ago                                             custom-nginx
+859d2bd59d79   mon-nginx                  "/docker-entrypoint.…"   41 hours ago   Created                                                             nginx-dockerfile
+438337c3df45   nginx                      "/docker-entrypoint.…"   42 hours ago   Exited (0) 40 hours ago                                             serveur-web
+69c7efef5bae   nwodtuhs/exegol:full       "/bin/bash /.exegol/…"   11 days ago    Exited (0) 11 days ago                                              exegol-STHACK
+rocky@pacman:~/Documents/DevOps$ 
+```
+
 Cette configuration permet de simuler une DMZ (zone démilitarisée) où seuls certains services ont accès à d'autres, renforçant ainsi la sécurité réseau.
 
-Ce genre de configuration, avec plusieurs réseaux Docker et des services qui n'ont pas tous accès les uns aux autres, représente une architecture très courante dans le monde professionnel. On parle souvent d’architecture en trois tiers : un front-end, un back-end (API), et une base de données.
-
-Par exemple, on pourrait avoir un conteneur NGINX pour servir l’interface utilisateur, un conteneur Node.js ou Python Flask pour la logique métier, et un conteneur MySQL pour stocker les données. Dans ce cas, le front n’a pas besoin de parler directement à la base de données, et ne doit même pas pouvoir le faire pour des raisons de sécurité. C’est le back-end (API) qui joue le rôle d’intermédiaire et contrôle tous les accès à la base.
+On pourrait avoir un conteneur NGINX pour servir l’interface utilisateur, un conteneur Node.js ou Python Flask pour la logique métier, et un conteneur MySQL pour stocker les données. Dans ce cas, le front n’a pas besoin de parler directement à la base de données, et ne doit même pas pouvoir le faire pour des raisons de sécurité. C’est le back-end (API) qui joue le rôle d’intermédiaire et contrôle tous les accès à la base.
 
 Dans Docker, on crée donc deux réseaux : un réseau frontend, partagé par le front et l’API, et un réseau backend, partagé par l’API et la base de données. Comme ça, le front peut parler à l’API, l’API peut parler à la base, mais le front ne peut jamais accéder à la base directement.
 
